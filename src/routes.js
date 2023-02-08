@@ -6,26 +6,6 @@ const database = new Database()
 
 export const routes =  [
   {
-    method: 'GET',
-    path: buildRoutePath('/tasks'),
-    handler: (req, res) => {
-      const { search } = req.query
-
-
-      const tasks = database.select('tasks', search 
-        ? 
-          {
-            title: search,
-            description: search,
-          }
-        : null
-      )
-
-      return res
-      .end(JSON.stringify(tasks))
-    }
-  },
-  {
     method: 'POST',
     path: buildRoutePath('/tasks'),
     handler: (req, res) => {
@@ -52,9 +32,44 @@ export const routes =  [
         completed_at: null
       }
 
-      database.insert('tasks', task)
+      try {
+        database.insert('tasks', task)
+        
+        return res.writeHead(201).end()
+      } catch (error) {
+        console.log(error)
+        return res.writeHead(400).end(
+          JSON.stringify({ message: 'It was not possible to add a new task, please try again later'})
+        )
+      }
 
-      return res.writeHead(201).end()
+      
+    }
+  },
+  {
+    method: 'GET',
+    path: buildRoutePath('/tasks'),
+    handler: (req, res) => {
+      const { search } = req.query
+
+      try {
+        const tasks = database.select('tasks', search 
+          ? 
+            {
+              title: search,
+              description: search,
+            }
+          : null
+        )
+
+        return res
+        .end(JSON.stringify(tasks))
+      } catch (error) {
+        console.log(error)
+        return res.writeHead(400).end(
+          JSON.stringify({message: 'It was not possible to load the tasks'})
+        )
+      }
     }
   },
   {
@@ -71,9 +86,17 @@ export const routes =  [
         )
       }
 
-      database.update('tasks', id, title, description)
+      try {
+        database.update('tasks', id, title, description)
 
-      return res.writeHead(204).end()
+        return res.writeHead(204).end()
+      } catch (error) {
+        console.log(error)
+        return res.writeHead(400).end(
+          JSON.stringify({ message: 'It was not possible to update this task.'})
+        )
+      }
+      
     }
   },
   {
@@ -102,9 +125,18 @@ export const routes =  [
       
       const { id } = req.params
 
-      database.delete('tasks', id)
+      try {
+        database.delete('tasks', id)
 
-      return res.writeHead(204).end()
+       return res.writeHead(204).end()
+      } catch (error) {
+        console.log(error)
+
+        return res.writeHead(400).end(
+          JSON.stringify({ message: 'It was not possible to delete this task.'})
+        )
+      }
+      
     }
   },
 
