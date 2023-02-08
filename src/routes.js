@@ -31,6 +31,18 @@ export const routes =  [
     handler: (req, res) => {
       const { title, description } = req.body
 
+      if(!title){
+        return res.writeHead(400).end(
+          JSON.stringify({ message: 'title is required'})
+        )
+      }
+
+      if(!description){
+        return res.writeHead(400).end(
+          JSON.stringify({ message: 'description is required'})
+        )
+      }
+
       const task = {
         id: randomUUID(),
         title,
@@ -43,6 +55,56 @@ export const routes =  [
       database.insert('tasks', task)
 
       return res.writeHead(201).end()
+    }
+  },
+  {
+    method: 'PUT',
+    path: buildRoutePath('/tasks/:id'),
+    handler: (req, res) => {
+      
+      const { id  } = req.params
+      const { title , description } = req.body
+
+      if(!title && !description){
+        return res.writeHead(400).end(
+          JSON.stringify({ message: 'Inform title or description'})
+        )
+      }
+
+      database.update('tasks', id, title, description)
+
+      return res.writeHead(204).end()
+    }
+  },
+  {
+    method: 'PATCH',
+    path: buildRoutePath('/tasks/:id/complete'),
+    handler: (req, res) => {
+      
+      const { id  } = req.params
+
+      try {
+        database.toggleStatus('tasks', id)
+      } catch (error) {
+        console.log(error)
+        return res.writeHead(400).end(
+          JSON.stringify({ message: 'It was not possible to update this task status'})
+        )
+      }
+
+      return res.writeHead(204).end()
+    }
+  },
+  {
+    method: 'DELETE',
+    path: buildRoutePath('/tasks/:id'),
+    handler: (req, res) => {
+      
+      const { id } = req.params
+
+      database.delete('tasks', id)
+
+      return res.writeHead(204).end()
     }
   },
 

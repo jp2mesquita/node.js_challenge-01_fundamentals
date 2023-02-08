@@ -45,5 +45,49 @@ export class Database {
     return data
   }
 
+  update(table, id, title, description) {
+    const taskToUpdateIndex = this.#database[table].findIndex(row => row.id === id)
+
+    if (taskToUpdateIndex > -1) {
+      const newTask = {
+        title: title ? title : this.#database[table][taskToUpdateIndex].title,
+        description: description ? description : this.#database[table][taskToUpdateIndex].description,
+        updated_at: new Date()
+      }
+      const previousInfo = this.#database[table][taskToUpdateIndex]
+      this.#database[table][taskToUpdateIndex] = {  ...previousInfo, ...newTask}
+      this.#persist()
+    }
+  }
+
+  toggleStatus(table, id) {
+    const taskToToggleIndex = this.#database[table].findIndex(row => row.id === id)
+
+    if (taskToToggleIndex > -1) {
+      const newCompleted_at = 
+        this.#database[table][taskToToggleIndex].completed_at
+          ? null 
+          : new Date()
+      const newStatus = {
+        completed_at: newCompleted_at,
+        updated_at: new Date()
+      }
+      const previousInfo = this.#database[table][taskToToggleIndex]
+      this.#database[table][taskToToggleIndex] = { ...previousInfo, ...newStatus }
+    }
+  }
+
+  delete(table, id) {
+    const taskToDeleteIndex = this.#database[table].findIndex(row => row.id === id)
+
+    if ( taskToDeleteIndex > -1) {
+      this.#database[table].splice(taskToDeleteIndex, 1)
+      this.#persist()
+    } else {
+      throw (error) => {
+        console.log(error)
+      }
+    }
+  }
   
 }
